@@ -80,6 +80,12 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const result = await productCollection.deleteOne(query);
     });
+
+    // add new item
+    app.post("/additem", async (req, res) => {
+      const newItem = req.body;
+      const item = await productCollection.insertOne(newItem);
+    });
   } finally {
   }
 }
