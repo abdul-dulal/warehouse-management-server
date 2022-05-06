@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+var jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 let cors = require("cors");
 const port = process.env.PORT || 4000;
@@ -18,6 +19,7 @@ async function run() {
   try {
     await client.connect();
     const productCollection = client.db("gymEquipment").collection("equipment");
+    const myitemCollection = client.db("myItem").collection("item");
 
     // get all product
     app.get("/product", async (req, res) => {
@@ -58,7 +60,7 @@ async function run() {
     app.put("/user/:id", async (req, res) => {
       const id = req.params.id;
       const updateProduct = req.body;
-      console.log(updateProduct.number);
+
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updateDoc = {
@@ -79,18 +81,34 @@ async function run() {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await productCollection.deleteOne(query);
+      res.send(result);
     });
 
-    // add new item
+    // post  new item
     app.post("/additem", async (req, res) => {
       const newItem = req.body;
       const item = await productCollection.insertOne(newItem);
+      res.send(item);
     });
 
-    // filter by email
-    app.get('/item/:email', (req,res)=>{
-      
-    })
+    // query by email
+    app.get("/myitem", async (req, res) => {
+      const email = req.query.email;
+
+      const query = { email: email };
+      const cursor = productCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    //create token
+    app.post("/login", (req, res) => {
+      const user = req.body;
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOEKN, {
+        expiresIn: "1d",
+      });
+      res.send(accessToken);
+    });
   } finally {
   }
 }
