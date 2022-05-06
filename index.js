@@ -86,6 +86,11 @@ async function run() {
       const newItem = req.body;
       const item = await productCollection.insertOne(newItem);
     });
+
+    // filter by email
+    app.get('/item/:email', (req,res)=>{
+      
+    })
   } finally {
   }
 }
