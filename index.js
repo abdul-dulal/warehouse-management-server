@@ -91,14 +91,36 @@ async function run() {
       res.send(item);
     });
 
-    // query by email
-    app.get("/myitem", async (req, res) => {
-      const email = req.query.email;
+    // verify token
 
-      const query = { email: email };
-      const cursor = productCollection.find(query);
-      const result = await cursor.toArray();
-      res.send(result);
+    function verifyToken(req, res, next) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader) {
+        return res.status(401).send({ message: "unauthorized access" });
+      }
+      const token = authHeader.split(" ")[1];
+      jwt.verify(token, process.env.ACCESS_TOEKN, function (err, decoded) {
+        if (err) {
+          return res.status(403).send({ message: "forbiden access" });
+        }
+
+        req.decoded = decoded;
+        next();
+      });
+    }
+
+    // query by email
+    app.get("/myitem", verifyToken, async (req, res) => {
+      const decodedEmail = req.decoded.email;
+      const email = req.query.email;
+      if (email === decodedEmail) {
+        const query = { email: email };
+        const cursor = productCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+      } else {
+        res.send({ message: "Forbiden" });
+      }
     });
 
     //create token
