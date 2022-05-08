@@ -112,11 +112,13 @@ async function run() {
     // query by email
     app.get("/myitem", verifyToken, async (req, res) => {
       const decodedEmail = req.decoded.email;
+      console.log({ decodedEmail });
       const email = req.query.email;
       if (email === decodedEmail) {
         const query = { email: email };
         const cursor = productCollection.find(query);
         const result = await cursor.toArray();
+
         res.send(result);
       } else {
         res.send({ message: "Forbiden" });
