@@ -118,7 +118,7 @@ async function run() {
         const query = { email: email };
         const cursor = productCollection.find(query);
         const result = await cursor.toArray();
-
+        console.log({ result });
         res.send(result);
       } else {
         res.send({ message: "Forbiden" });
@@ -131,6 +131,7 @@ async function run() {
       const accessToken = jwt.sign(user, process.env.ACCESS_TOEKN, {
         expiresIn: "1d",
       });
+      console.log(accessToken);
       res.send(accessToken);
     });
   } finally {
